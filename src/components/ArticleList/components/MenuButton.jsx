@@ -22,10 +22,15 @@ import {
   } from "@/stores/modalStore.js";
   import { useTranslation } from "react-i18next";
   import { handleRefresh } from "@/handlers/feedHandlers";
+  import { CircleDot, Star, Text } from "lucide-react";
   
+  import { filter } from "@/stores/articlesStore";
+  import { useStore } from "@nanostores/react";
+
   export default function MenuButton() {
     const { feedId, categoryId } = useParams();
     const { t } = useTranslation();
+    const $filter = useStore(filter);
   
     return (
       <>
@@ -66,6 +71,37 @@ import {
             textValue="divider"
           >
             <Divider />
+          </DropdownItem>
+              <DropdownItem
+                key="starred"
+                onPress={() => filter.set("starred")}
+                startContent={<Star className="size-4 text-default-500" fill={$filter === "starred" ? "currentColor" : "none"} />}
+              >
+                {t("articleList.starred")}
+              </DropdownItem>
+              <DropdownItem
+                key="unread"
+                onPress={() => filter.set("unread")}
+                startContent={<CircleDot className="size-4 text-default-500" fill={$filter === "unread" ? "currentColor" : "none"} />}
+              >
+                {t("articleList.unread")}
+              </DropdownItem>
+              <DropdownItem
+                key="all"
+                onPress={() => filter.set("all")}
+                startContent={<Text strokeWidth={4} className="size-4 text-default-500" />}
+              >
+                {t("articleList.all")}
+              </DropdownItem>
+
+
+              <DropdownItem
+            isDisabled
+            classNames={{ base: "py-1.5" }}
+            textValue="divider"
+          >
+            <Divider />
+
           </DropdownItem>
               <DropdownItem
                 key="delete"

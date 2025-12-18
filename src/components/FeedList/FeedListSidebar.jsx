@@ -31,11 +31,12 @@ const FeedListSidebar = () => {
   const $lastSync = useStore(lastSync);
   const $isSyncing = useStore(isSyncing);
   const { showHiddenFeeds, floatingSidebar } = useStore(settingsState);
-  const { setOpenMobile } = useSidebar();
+  const { setOpenMobile, openMobile } = useSidebar();
   const { articleId } = useParams();
   const { isMobile } = useIsMobile();
   const navigate = useNavigate();
   const basePath = window.location.pathname.split("/article/")[0];
+  
   useSwipeGesture({
     onSwipeRight: () => {
       if (!articleId && isMobile && !isModalOpen.get()) {
@@ -43,6 +44,12 @@ const FeedListSidebar = () => {
       }
       if (articleId && isMobile) {
         navigate(basePath || "/");
+      }
+    },
+    onSwipeLeft: () => {
+      // When feed list sidebar is open on mobile, swipe left to close it and display ArticleList
+      if (openMobile && isMobile && !isModalOpen.get()) {
+        setOpenMobile(false);
       }
     },
   });

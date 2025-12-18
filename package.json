@@ -65,5 +65,8 @@
     "postcss": "^8.4.49",
     "tailwindcss": "^4.1.11",
     "vite": "^6.0.7"
+  },
+  "optionalDependencies": {
+    "lightningcss-linux-x64-musl": "^1.30.2"
   }
 }

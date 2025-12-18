@@ -10,7 +10,7 @@ import {
   visibleRange,
 } from "@/stores/articlesStore.js";
 import { lastSync } from "@/stores/syncStore.js";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import ArticleListHeader from "./components/ArticleListHeader";
 import ArticleListContent from "./components/ArticleListContent";
 import ArticleListFooter from "./components/ArticleListFooter";
@@ -18,9 +18,13 @@ import { settingsState } from "@/stores/settingsStore.js";
 import ArticleView from "@/components/ArticleView/ArticleView.jsx";
 import Indicator from "@/components/ArticleList/components/Indicator.jsx";
 import { cn } from "@heroui/react";
+import { useSwipeGesture } from "@/hooks/useSwipeGesture.js";
+import { useIsMobile } from "@/hooks/use-mobile.jsx";
+import { isModalOpen } from "@/stores/modalStore.js";
 
 const ArticleList = () => {
-  const { feedId, categoryId } = useParams();
+  const { feedId, categoryId, articleId } = useParams();
+  const navigate = useNavigate();
   const $filteredArticles = useStore(filteredArticles);
   const $filter = useStore(filter);
   const $lastSync = useStore(lastSync);
@@ -33,8 +37,29 @@ const ArticleList = () => {
     floatingSidebar,
   } = useStore(settingsState);
   const virtuosoRef = useRef(null);
+  const { isMobile } = useIsMobile();
 
   const lastSyncTime = useRef(null);
+
+  // Add swipe right gesture to navigate to first article when no article is selected
+  useSwipeGesture({
+    onSwipeRight: () => {
+      // Only trigger when:
+      // 1. No article is currently selected
+      // 2. On mobile device
+      // 3. There are articles to display
+      // 4. No modal is open
+      if (!articleId && isMobile && $filteredArticles.length > 0 && !isModalOpen.get()) {
+        const firstArticle = $filteredArticles[0];
+        const basePath = feedId 
+          ? `/feed/${feedId}` 
+          : categoryId 
+          ? `/category/${categoryId}` 
+          : "";
+        navigate(`${basePath}/article/${firstArticle.id}`);
+      }
+    },
+  });
 
   useEffect(() => {
     // 如果为同步触发刷新且当前文章列表不在顶部，则暂时不刷新列表，防止位置发生位移

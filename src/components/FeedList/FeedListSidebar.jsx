@@ -38,20 +38,29 @@ const FeedListSidebar = () => {
   const navigate = useNavigate();
   const $filteredArticles = useStore(filteredArticles);
   const basePath = window.location.pathname.split("/article/")[0];
+  
   useSwipeGesture({
     onSwipeRight: () => {
+      const noArticleSelected = !articleId;
+      const hasArticles = $filteredArticles.length > 0;
+      const noModalOpen = !isModalOpen.get();
+      
       // When feed list sidebar is open on mobile, swipe right to display first article
-      if (!articleId && isMobile && openMobile && !isModalOpen.get() && $filteredArticles.length > 0) {
+      const shouldOpenFirstArticle = noArticleSelected && isMobile && openMobile && noModalOpen && hasArticles;
+      if (shouldOpenFirstArticle) {
         const firstArticle = $filteredArticles[0];
         navigate(`${basePath}/article/${firstArticle.id}`);
         setOpenMobile(false); // Close the sidebar after navigating
         return;
       }
+      
       // When feed list sidebar is closed on mobile, swipe right to open it
-      if (!articleId && isMobile && !openMobile && !isModalOpen.get()) {
+      const shouldOpenSidebar = noArticleSelected && isMobile && !openMobile && noModalOpen;
+      if (shouldOpenSidebar) {
         setOpenMobile(true);
         return;
       }
+      
       // When viewing an article, swipe right to go back to article list
       if (articleId && isMobile) {
         navigate(basePath || "/");

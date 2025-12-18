@@ -26,21 +26,33 @@ import { useSwipeGesture } from "@/hooks/useSwipeGesture";
 import { useParams, useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isModalOpen } from "@/stores/modalStore";
+import { filteredArticles } from "@/stores/articlesStore.js";
 const FeedListSidebar = () => {
   const { t } = useTranslation();
   const $lastSync = useStore(lastSync);
   const $isSyncing = useStore(isSyncing);
   const { showHiddenFeeds, floatingSidebar } = useStore(settingsState);
-  const { setOpenMobile } = useSidebar();
+  const { setOpenMobile, openMobile } = useSidebar();
   const { articleId } = useParams();
   const { isMobile } = useIsMobile();
   const navigate = useNavigate();
+  const $filteredArticles = useStore(filteredArticles);
   const basePath = window.location.pathname.split("/article/")[0];
   useSwipeGesture({
     onSwipeRight: () => {
-      if (!articleId && isMobile && !isModalOpen.get()) {
-        setOpenMobile(true);
+      // When feed list sidebar is open on mobile, swipe right to display first article
+      if (!articleId && isMobile && openMobile && !isModalOpen.get() && $filteredArticles.length > 0) {
+        const firstArticle = $filteredArticles[0];
+        navigate(`${basePath}/article/${firstArticle.id}`);
+        setOpenMobile(false); // Close the sidebar after navigating
+        return;
       }
+      // When feed list sidebar is closed on mobile, swipe right to open it
+      if (!articleId && isMobile && !openMobile && !isModalOpen.get()) {
+        setOpenMobile(true);
+        return;
+      }
+      // When viewing an article, swipe right to go back to article list
       if (articleId && isMobile) {
         navigate(basePath || "/");
       }

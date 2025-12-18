@@ -31,7 +31,9 @@ export function useHotkeys() {
   const currentIndex = $articles.findIndex((a) => a.id === $activeArticle?.id);
 
   // 获取当前路径并去掉 article 部分
-  const basePath = window.location.pathname.split("/article/")[0];
+  const basePath = window.location.pathname
+    .split("/article/")[0]
+    .replace(/\/$/, "");
 
   useEffect(() => {
     const handleKeyDown = async (e) => {

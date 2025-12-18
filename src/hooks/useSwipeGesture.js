@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-export function useSwipeGesture({ onSwipeRight, threshold = 50 }) {
+export function useSwipeGesture({ onSwipeRight, onSwipeLeft, threshold = 50 }) {
   const touchStartX = useRef(0);
   const touchStartY = useRef(0);
   const [isScrolling, setIsScrolling] = useState(false);
@@ -83,6 +83,10 @@ export function useSwipeGesture({ onSwipeRight, threshold = 50 }) {
       if (isHorizontalSwipe && deltaX > threshold) {
         onSwipeRight?.();
       }
+      
+      if (isHorizontalSwipe && deltaX < -threshold) {
+        onSwipeLeft?.();
+      }
 
       // 重置状态
       touchStartX.current = 0;
@@ -102,5 +106,5 @@ export function useSwipeGesture({ onSwipeRight, threshold = 50 }) {
       document.removeEventListener("touchmove", handleTouchMove);
       document.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [onSwipeRight, threshold, isScrolling, isHorizontalSwipe]);
+  }, [onSwipeRight, onSwipeLeft, threshold, isScrolling, isHorizontalSwipe]);
 }

@@ -26,7 +26,6 @@ import { useSwipeGesture } from "@/hooks/useSwipeGesture";
 import { useParams, useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { isModalOpen } from "@/stores/modalStore";
-import { filteredArticles } from "@/stores/articlesStore.js";
 const FeedListSidebar = () => {
   const { t } = useTranslation();
   const $lastSync = useStore(lastSync);
@@ -36,34 +35,21 @@ const FeedListSidebar = () => {
   const { articleId } = useParams();
   const { isMobile } = useIsMobile();
   const navigate = useNavigate();
-  const $filteredArticles = useStore(filteredArticles);
   const basePath = window.location.pathname.split("/article/")[0];
   
   useSwipeGesture({
     onSwipeRight: () => {
-      const noArticleSelected = !articleId;
-      const hasArticles = $filteredArticles.length > 0;
-      const noModalOpen = !isModalOpen.get();
-      
-      // When feed list sidebar is open on mobile, swipe right to display first article
-      const shouldOpenFirstArticle = noArticleSelected && isMobile && openMobile && noModalOpen && hasArticles;
-      if (shouldOpenFirstArticle) {
-        const firstArticle = $filteredArticles[0];
-        navigate(`${basePath}/article/${firstArticle.id}`);
-        setOpenMobile(false); // Close the sidebar after navigating
-        return;
-      }
-      
-      // When feed list sidebar is closed on mobile, swipe right to open it
-      const shouldOpenSidebar = noArticleSelected && isMobile && !openMobile && noModalOpen;
-      if (shouldOpenSidebar) {
+      if (!articleId && isMobile && !isModalOpen.get()) {
         setOpenMobile(true);
-        return;
       }
-      
-      // When viewing an article, swipe right to go back to article list
       if (articleId && isMobile) {
         navigate(basePath || "/");
+      }
+    },
+    onSwipeLeft: () => {
+      // When feed list sidebar is open on mobile, swipe left to close it and display ArticleList
+      if (openMobile && isMobile && !isModalOpen.get()) {
+        setOpenMobile(false);
       }
     },
   });

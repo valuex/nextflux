@@ -192,46 +192,47 @@ export async function updateArticleStarred(article) {
   }
 }
 
-// 改进后的 markAllAsRead 函数
+// 改进后的 markAllAsRead 函数 - 优化为乐观更新
 export async function markAllAsRead(type = "all", id = null) {
+  // 获取当前页面的文章
+  const articles = filteredArticles.get();
+  const currentCounts = unreadCounts.get();
+  const updatedCounts = { ...currentCounts };
+  
+  let affectedArticles = [];
+  let categoryFeedIds = [];
+
   try {
-    // 先调用服务器 API 标记已读
-    if (navigator.onLine) {
-      await minifluxAPI.markAllAsRead(type, id);
+    // 预先获取 feeds（如果需要）以避免多次调用
+    if (type === "category" && id) {
+      const feeds = await getFeeds();
+      categoryFeedIds = feeds
+        .filter((feed) => feed.categoryId === parseInt(id))
+        .map((feed) => feed.id);
     }
 
-    // 获取当前页面的文章
-    const articles = filteredArticles.get();
-    
-    // 判断当前页面是否需要更新（是否显示了被标记的内容）
-    let shouldUpdateCurrentView = false;
-    let affectedArticles = [];
-
+    // 确定受影响的文章和需要更新的计数
     if (type === "feed" && id) {
-      // 标记特定 feed：只有当前页面显示该 feed 时才更新列表
       affectedArticles = articles.filter(
         (article) => article.feedId === parseInt(id) && article.status !== "read"
       );
-      shouldUpdateCurrentView = affectedArticles.length > 0;
+      updatedCounts[id] = 0;
     } else if (type === "category" && id) {
-      // 标记特定分类：检查当前文章是否属于该分类
-      const feeds = await getFeeds();
-      const categoryFeedIds = feeds
-        .filter((feed) => feed.categoryId === parseInt(id))
-        .map((feed) => feed.id);
-      
       affectedArticles = articles.filter(
         (article) => categoryFeedIds.includes(article.feedId) && article.status !== "read"
       );
-      shouldUpdateCurrentView = affectedArticles.length > 0;
+      categoryFeedIds.forEach((feedId) => {
+        updatedCounts[feedId] = 0;
+      });
     } else {
-      // 标记全部：更新当前所有未读文章
       affectedArticles = articles.filter((article) => article.status !== "read");
-      shouldUpdateCurrentView = affectedArticles.length > 0;
+      Object.keys(updatedCounts).forEach((feedId) => {
+        updatedCounts[feedId] = 0;
+      });
     }
 
-    // 更新当前页面的文章列表（如果需要）
-    if (shouldUpdateCurrentView) {
+    // 乐观更新：立即更新 UI
+    if (affectedArticles.length > 0) {
       filteredArticles.set(
         articles.map((article) =>
           affectedArticles.some((a) => a.id === article.id)
@@ -239,41 +240,27 @@ export async function markAllAsRead(type = "all", id = null) {
             : article
         )
       );
-
-      // 更新本地数据库
-      await addArticles(
-        affectedArticles.map((article) => ({
-          ...article,
-          status: "read",
-        }))
-      );
     }
-
-    // 更新未读计数
-    const currentCounts = unreadCounts.get();
-    const updatedCounts = { ...currentCounts };
-
-    if (type === "feed" && id) {
-      // 特定 feed：计数归 0
-      updatedCounts[id] = 0;
-    } else if (type === "category" && id) {
-      // 特定分类：该分类下所有 feed 计数归 0
-      const feeds = await getFeeds();
-      const categoryFeedIds = feeds
-        .filter((feed) => feed.categoryId === parseInt(id))
-        .map((feed) => feed.id);
-      
-      categoryFeedIds.forEach((feedId) => {
-        updatedCounts[feedId] = 0;
-      });
-    } else {
-      // 全部：所有 feed 计数归 0
-      Object.keys(updatedCounts).forEach((feedId) => {
-        updatedCounts[feedId] = 0;
-      });
-    }
-
     unreadCounts.set(updatedCounts);
+
+    // 异步执行后台同步，不等待完成
+    Promise.all([
+      // 调用服务器 API
+      navigator.onLine ? minifluxAPI.markAllAsRead(type, id) : Promise.resolve(),
+      // 更新本地数据库（仅更新受影响的文章）
+      affectedArticles.length > 0
+        ? addArticles(
+            affectedArticles.map((article) => ({
+              ...article,
+              status: "read",
+            }))
+          )
+        : Promise.resolve(),
+    ]).catch((err) => {
+      console.error("后台同步标记已读失败:", err);
+      // 如果失败，可以考虑回滚 UI 或显示错误提示
+      // 但不抛出错误，因为 UI 已经更新
+    });
   } catch (err) {
     console.error("标记已读失败:", err);
     throw err;

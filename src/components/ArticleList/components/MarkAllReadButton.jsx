@@ -19,8 +19,6 @@ export default function MarkAllReadButton() {
   const $isSyncing = useStore(isSyncing);
   const $filter = useStore(filter);
   return (
-    <Dropdown>
-      <DropdownTrigger>
         <Button
           size="sm"
           radius="full"
@@ -28,16 +26,6 @@ export default function MarkAllReadButton() {
           isIconOnly
           isDisabled={$filter === "starred"}
           isLoading={$isSyncing}
-        >
-          <CircleCheck className="size-4 text-default-500" />
-        </Button>
-      </DropdownTrigger>
-      <DropdownMenu aria-label="markAllAsRead" variant="flat">
-        <DropdownItem
-          key="markAsRead"
-          className="text-danger"
-          color="danger"
-          startContent={<CircleCheck className="size-4" />}
           onPress={() => {
             if (feedId) {
               handleMarkAllRead("feed", feedId);
@@ -48,9 +36,7 @@ export default function MarkAllReadButton() {
             }
           }}
         >
-          {t("articleList.markAllRead")}
-        </DropdownItem>
-      </DropdownMenu>
-    </Dropdown>
+          <CircleCheck className="size-4 text-default-500" />
+        </Button>
   );
 }

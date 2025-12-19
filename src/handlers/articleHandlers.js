@@ -28,7 +28,7 @@ export const handleToggleStar = async (article) => {
 };
 
 // 处理标记所有文章为已读
-export const handleMarkAllRead = async (type, id) => {
+export const handleMarkAllRead = async (type, id, onComplete) => {
   try {
     switch (type) {
       case "feed":
@@ -39,6 +39,10 @@ export const handleMarkAllRead = async (type, id) => {
         break;
       default:
         await markAllAsRead();
+    }
+    // Call the onComplete callback if provided
+    if (typeof onComplete === "function") {
+      onComplete();
     }
   } catch (err) {
     console.error("标记已读失败:", err);

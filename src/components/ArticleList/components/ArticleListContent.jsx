@@ -16,6 +16,7 @@ import { CheckCheck, Loader2 } from "lucide-react";
 import { handleMarkAllRead } from "@/handlers/articleHandlers";
 import { isSyncing } from "@/stores/syncStore.js";
 import { useTranslation } from "react-i18next";
+import { useSidebarNavigation } from "@/hooks/useSidebarNavigation.js";
 import { loadArticles } from "@/stores/articlesStore";
 import { settingsState } from "@/stores/settingsStore.js";
 import { cn } from "@/lib/utils.js";
@@ -35,6 +36,7 @@ export default function ArticleListContent({
 }) {
   const { t } = useTranslation();
   const { feedId, categoryId, articleId } = useParams();
+  const { navigateToNext } = useSidebarNavigation();
   const $filter = useStore(filter);
   const $isSyncing = useStore(isSyncing);
   const { isMedium } = useIsMobile();
@@ -137,9 +139,9 @@ export default function ArticleListContent({
                     }
                     onPress={() => {
                       if (feedId) {
-                        handleMarkAllRead("feed", feedId);
+                        handleMarkAllRead("feed", feedId, navigateToNext);
                       } else if (categoryId) {
-                        handleMarkAllRead("category", categoryId);
+                        handleMarkAllRead("category", categoryId, navigateToNext);
                       } else {
                         handleMarkAllRead();
                       }

@@ -43,6 +43,7 @@ export default {
     markBelowAsRead: "Marquer ci-dessous comme lu",
     markAsRead: "Marquer comme lu",
     markAsUnread: "Marquer comme non lu",
+    allHasBeenRead: "Tout a été lu.",
   },
   feed: {
     feedUrl: "URL du flux",
@@ -52,6 +53,8 @@ export default {
     feedHide: "Masquer le flux globalement",
     feedCrawlerDescription: "Essayer de récupérer automatiquement le contenu original",
     feedHideDescription: "Masquer ce flux et ses articles par défaut",
+    feedOpenInBrowser: "Ouvrir les articles dans le navigateur",
+    feedOpenInBrowserDescription: "Ouvrir les articles du flux dans un nouvel onglet du navigateur au lieu de l'application",
     feedTitlePlaceholder: "Veuillez entrer le titre du flux",
     feedCategoryPlaceholder: "Veuillez sélectionner une catégorie",
     feedCategoryRequired: "Veuillez sélectionner une catégorie",

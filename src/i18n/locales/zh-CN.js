@@ -43,6 +43,7 @@ export default {
     markBelowAsRead: "标记下方为已读",
     markAsRead: "标为已读",
     markAsUnread: "标为未读",
+    allHasBeenRead: "全部已读。",
   },
   feed: {
     feedUrl: "订阅地址",
@@ -52,6 +53,8 @@ export default {
     feedCrawler: "抓取原始内容",
     feedCrawlerDescription: "尝试自动抓取原始内容",
     feedHideDescription: "默认隐藏此订阅及其文章",
+    feedOpenInBrowser: "在浏览器中打开文章",
+    feedOpenInBrowserDescription: "在新浏览器标签页中打开订阅文章",
     feedTitlePlaceholder: "请输入订阅标题",
     feedCategoryPlaceholder: "请选择分类",
     feedCategoryRequired: "请选择分类",

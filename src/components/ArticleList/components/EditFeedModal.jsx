@@ -20,6 +20,7 @@ import { forceSync } from "@/stores/syncStore";
 import { Check, Copy, Minus, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import CustomModal from "@/components/ui/CustomModal.jsx";
+import { getFeedPreference, setFeedPreference } from "@/db/feedPreferences.js";
 
 export default function EditFeedModal() {
   const { t } = useTranslation();
@@ -38,6 +39,7 @@ export default function EditFeedModal() {
     category_id: "",
     hide_globally: false,
     crawler: false,
+    open_articles_in_browser: false,
     keeplist_rules: "",
     blocklist_rules: "",
     rewrite_rules: "",
@@ -47,11 +49,13 @@ export default function EditFeedModal() {
     if (feedId) {
       const feed = $feeds.find((f) => f.id === parseInt(feedId));
       if (feed) {
+        const localPrefs = getFeedPreference(parseInt(feedId));
         setFormData({
           title: feed.title,
           category_id: feed.categoryId,
           hide_globally: feed.hide_globally,
           crawler: feed.crawler,
+          open_articles_in_browser: localPrefs.open_articles_in_browser || false,
           keeplist_rules: feed.keeplist_rules,
           blocklist_rules: feed.blocklist_rules,
           rewrite_rules: feed.rewrite_rules,
@@ -67,11 +71,13 @@ export default function EditFeedModal() {
     if (feedId) {
       const feed = $feeds.find((f) => f.id === parseInt(feedId));
       if (feed) {
+        const localPrefs = getFeedPreference(parseInt(feedId));
         setFormData({
           title: feed.title,
           category_id: feed.categoryId,
           hide_globally: feed.hide_globally,
           crawler: feed.crawler,
+          open_articles_in_browser: localPrefs.open_articles_in_browser || false,
           keeplist_rules: feed.keeplist_rules,
           blocklist_rules: feed.blocklist_rules,
           rewrite_rules: feed.rewrite_rules,
@@ -85,9 +91,28 @@ export default function EditFeedModal() {
     e.preventDefault();
     try {
       setLoading(true);
-      await minifluxAPI.updateFeed(feedId, formData);
-      await forceSync(); // 重新加载订阅源列表以更新UI
+      
+      // Save local preferences immediately (synchronous)
+      setFeedPreference(parseInt(feedId), {
+        open_articles_in_browser: formData.open_articles_in_browser
+      });
+      
+      // Send only API-supported fields to Miniflux
+      const apiData = {
+        title: formData.title,
+        category_id: formData.category_id,
+        hide_globally: formData.hide_globally,
+        crawler: formData.crawler,
+        keeplist_rules: formData.keeplist_rules,
+        blocklist_rules: formData.blocklist_rules,
+        rewrite_rules: formData.rewrite_rules,
+      };
+      
+      await minifluxAPI.updateFeed(feedId, apiData);
+      // Close immediately, let sync happen in background
       onClose();
+      // Sync in background without blocking UI
+      forceSync();
     } catch (error) {
       console.error("更新订阅源失败:", error);
     } finally {
@@ -200,6 +225,23 @@ export default function EditFeedModal() {
             <div className="line-clamp-1">{t("feed.feedHide")}</div>
             <div className="text-xs text-default-400 line-clamp-1">
               {t("feed.feedHideDescription")}
+            </div>
+          </Checkbox>
+          <Checkbox
+            name="open_articles_in_browser"
+            size="sm"
+            classNames={{
+              base: "w-full max-w-full p-0 mx-0 -mt-4  mb-1",
+              label: "mt-4",
+            }}
+            isSelected={formData.open_articles_in_browser}
+            onValueChange={(value) =>
+              setFormData({ ...formData, open_articles_in_browser: value })
+            }
+          >
+            <div className="line-clamp-1">{t("feed.feedOpenInBrowser")}</div>
+            <div className="text-xs text-default-400 line-clamp-1">
+              {t("feed.feedOpenInBrowserDescription")}
             </div>
           </Checkbox>
           <Accordion

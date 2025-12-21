@@ -13,18 +13,18 @@ const defaultValue = {
   sortDirection: "desc", // asc, desc
   sortField: "published_at", // published_at, created_at
   showHiddenFeeds: false,
-  markAsReadOnScroll: false,
-  cardImageSize: "large", // none, small, large
+  markAsReadOnScroll: true, // 滚动时标记为已读
+  cardImageSize: "small", // none, small, large
   showFavicon: true,
   titleLines: 2,
-  textPreviewLines: 2,
+  textPreviewLines: 3,
   showReadingTime: true,
   autoHideToolbar: false,
   syncInterval: "15", // 添加同步间隔设置，默认15分钟
   showLineNumbers: false,
   forceDarkCodeTheme: false,
   defaultExpandCategory: false, // 默认展开分类
-  showUnreadByDefault: false,
+  showUnreadByDefault: true, // 默认显示未读文章
   reduceMotion: false,
   interfaceFontSize: "16",
   showIndicator: true,

@@ -1,13 +1,17 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useStore } from "@nanostores/react";
-import { feedsByCategory, categoryExpandedState, updateCategoryExpandState } from "@/stores/feedsStore.js";
+import { feedsByCategory, categoryExpandedState, updateCategoryExpandState, unreadCounts } from "@/stores/feedsStore.js";
 import { settingsState } from "@/stores/settingsStore.js";
+import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 export function useSidebarNavigation() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { categoryId, feedId } = useParams();
   const $feedsByCategory = useStore(feedsByCategory);
   const $categoryExpandedState = useStore(categoryExpandedState);
+  const $unreadCounts = useStore(unreadCounts);
   const { defaultExpandCategory } = useStore(settingsState);
 
   const getAllNavigableItems = () => {
@@ -72,8 +76,40 @@ export function useSidebarNavigation() {
     const items = getAllNavigableItems();
     const currentIndex = getCurrentItemIndex();
     
+    // Check if there are any unread items
+    const totalUnread = Object.values($unreadCounts).reduce((sum, count) => sum + count, 0);
+    if (totalUnread === 0) {
+      toast.success(t("common.allHasBeenRead"));
+      return;
+    }
+    
+    let nextItem;
+    
     if (currentIndex < items.length - 1) {
-      const nextItem = items[currentIndex + 1];
+      let nextIndex = currentIndex + 1;
+      nextItem = items[nextIndex];
+      
+      // Skip "All Articles" and navigate to the next feed
+      if (nextItem.type === 'all') {
+        // Find the next feed item
+        for (let i = nextIndex + 1; i < items.length; i++) {
+          if (items[i].type === 'feed') {
+            nextItem = items[i];
+            break;
+          }
+        }
+      }
+    } else {
+      // At the last item, wrap around to the first feed
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type === 'feed') {
+          nextItem = items[i];
+          break;
+        }
+      }
+    }
+    
+    if (nextItem) {
       navigate(nextItem.path);
     }
   };

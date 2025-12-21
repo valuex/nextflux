@@ -20,6 +20,7 @@ import { Ripple, useRipple } from "@heroui/react";
 import FeedIcon from "@/components/ui/FeedIcon.jsx";
 import { useTranslation } from "react-i18next";
 import { ContextMenu, ContextMenuItem } from "@/components/ui/ContextMenu";
+import { getFeedPreference } from "@/db/feedPreferences.js";
 
 export default function ArticleCard({ article }) {
   const { t } = useTranslation();
@@ -95,6 +96,19 @@ export default function ArticleCard({ article }) {
   }, [article, markAsReadOnScroll]);
 
   const handleArticleClick = async (article) => {
+    // Check if this feed should open articles in browser from local preferences
+    const localPrefs = getFeedPreference(article.feedId);
+    if (localPrefs.open_articles_in_browser) {
+      // Open article in new browser tab
+      window.open(article.url, '_blank');
+      // Mark as read
+      if (article.status !== "read") {
+        await handleMarkStatus(article);
+      }
+      return;
+    }
+    
+    // Default behavior: navigate within app
     const basePath = window.location.pathname.split("/article/")[0];
     const toUrl =
       basePath === "/"

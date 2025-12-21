@@ -43,6 +43,7 @@ export default {
     markBelowAsRead: "Aşağıyı Okundu Olarak İşaretle",
     markAsRead: "Okundu Olarak İşaretle",
     markAsUnread: "Okunmadı Olarak İşaretle",
+    allHasBeenRead: "Hepsi okundu.",
   },
   feed: {
     feedUrl: "Besleme URL'si",
@@ -52,6 +53,8 @@ export default {
     feedHide: "Beslemeyi her yerden gizle",
     feedCrawlerDescription: "Orijinal içeriği otomatik çekmeyi dene",
     feedHideDescription: "Bu beslemeyi ve makalelerini varsayılan olarak gizle",
+    feedOpenInBrowser: "Makaleleri tarayıcıda aç",
+    feedOpenInBrowserDescription: "Besleme makalelerini uygulama içinde değil yeni bir tarayıcı sekmesinde aç",
     feedTitlePlaceholder: "Lütfen besleme başlığını girin",
     feedCategoryPlaceholder: "Lütfen kategoriyi seçin",
     feedCategoryRequired: "Lütfen kategoriyi seçin",

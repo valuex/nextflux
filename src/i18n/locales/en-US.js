@@ -43,6 +43,7 @@ export default {
     markBelowAsRead: "Mark Below as Read",
     markAsRead: "Mark as Read",
     markAsUnread: "Mark as Unread",
+    allHasBeenRead: "All has been read.",
   },
   feed: {
     feedUrl: "Feed URL",
@@ -52,6 +53,8 @@ export default {
     feedHide: "Hide feed globally",
     feedCrawlerDescription: "Try to fetch original content automatically",
     feedHideDescription: "Hide this feed and its articles by default",
+    feedOpenInBrowser: "Open articles in browser",
+    feedOpenInBrowserDescription: "Open feed articles in a new browser tab instead of within the app",
     feedTitlePlaceholder: "Please enter feed title",
     feedCategoryPlaceholder: "Please select category",
     feedCategoryRequired: "Please select category",
